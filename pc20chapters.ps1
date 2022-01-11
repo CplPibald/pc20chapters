@@ -1,8 +1,6 @@
 using namespace System.Windows.Forms
 param([string] $file = "")
 
-#[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-#[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -107,7 +105,8 @@ function save ($file) {
         $d
     }
 
-    @{chapters=$chapterData; version=$PC20CHAPTERSVERSION} | ConvertTo-Json | Out-File -Encoding utf8 $file
+    $jsonstring = @{chapters=$chapterData; version=$PC20CHAPTERSVERSION} | ConvertTo-Json
+    [System.IO.File]::WriteAllLines($file, $jsonstring)
 
     $SCRIPT:saveFileName = $file
 }
