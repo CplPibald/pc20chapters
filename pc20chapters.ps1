@@ -1,8 +1,10 @@
 using namespace System.Windows.Forms
 param([string] $file = "")
 
-[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
-[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+#[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
+#[void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
 
 $PC20CHAPTERSVERSION = "1.2.0"
 
@@ -14,6 +16,11 @@ $GLOBAL:chapters = @()
 $SCRIPT:mainForm = New-Object System.Windows.Forms.Form
 $SCRIPT:chaptersPanel = New-Object System.Windows.Forms.Panel
 
+# TODO: change "hhmmss" in label to actual time
+# BUG: on open, save button prompts
+# TODO: on new chapter, move scroll bar to bottom
+# BUG: Why all the empty spaces at the top of the panel when it's scrolled?
+# BUG: Assembly problem.  See https://stackoverflow.com/questions/42837447/powershell-unable-to-find-type-when-using-ps-5-classes
 # TODO: make delete chapter button work
 # TODO: change title bar to include filename and * if modified
 # TODO: Support optional global attributes author, title, podcastName, description, fileName
