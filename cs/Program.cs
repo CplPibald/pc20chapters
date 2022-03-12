@@ -153,7 +153,7 @@ public class MainForm : Form
         });
         int rowYpx = 10;
         foreach (var row in rows) {
-            int h = ((ChapterBox)row).expanded ? 140 : 65;
+            int h = ((ChapterBox)row).expanded ? 140 : 90;
             row.Location = new Point(10, rowYpx);
             row.Size = new Size(800, h);
             rowYpx += h;
@@ -179,57 +179,69 @@ public class ChapterBox : GroupBox {
     public TextBox urlBox;
     public TextBox imgBox;
     public CheckBox tocBox;
+    public PictureBox picBox;
 
     public Chapter chapter;
+
+    static readonly Point[,] gridPoints;
+    static ChapterBox() {
+
+        int[] x_cols = { 30, 130, 190, 230 };
+        int[] y_rows = { 10, 35, 60 };
+
+        gridPoints = new Point[x_cols.Length, y_rows.Length];
+        for(int x = 0; x < x_cols.Length; x++) {
+            for (int y = 0; y < y_rows.Length; y++) {
+                gridPoints[x,y] = new Point(x_cols[x], y_rows[y]);
+            }
+        }
+    }
 
     public ChapterBox (Chapter ch) {
         chapter = ch;
         Location = new Point(10, 10);
         Size = new Size(800, 60);
 
-        var ypx = 10;
-        var xpx = 5;
         var boxheight = 25;
         expanded = false;
-        deleteButton = Util.createButton("x", new Point(5, 0), new Size(15, 15), this, (o,_) => { MainForm.removeChapter((ChapterBox)(((Button)o).Tag)); }, this);
-        dropButton = Util.createButton("v", new Point(5, 25), new Size(15, 15), this, (o,_) => { ((ChapterBox)(((Button)o).Tag)).toggleExpanded(); }, this);
-
-        // Disabling expand functionality, because the form doesn't need that much space right now
-        // But leaving the code in because I sweated over it and it works
+        deleteButton = Util.createButton("x", new Point(5, 0), new Size(20, 20), this, (o,_) => { MainForm.removeChapter((ChapterBox)(((Button)o).Tag)); }, this);
+        dropButton = Util.createButton("v", new Point(5, 25), new Size(20, 20), this, (o,_) => { ((ChapterBox)(((Button)o).Tag)).toggleExpanded(); }, this);
         dropButton.Visible = false;
-        // deleteButton.Visible = false;
-       
-        Util.createLabel("Start (hh:mm:ss):", new Point(xpx += 20, ypx), new Size(100, boxheight), this);
-        startTimeBox = Util.createInput(new Point(xpx += 100, ypx), new Size(50, boxheight), this);
-        startTimeBox.LostFocus += (o,a) => { chapter.startTime = validateTimestamp((TextBox)o); MainForm.adjustRows(); };
+
+        Util.createLabel("Start (hh:mm:ss):", gridPoints[0,0], new Size(100, boxheight), this);
+        startTimeBox = Util.createInput(gridPoints[1,0], new Size(50, boxheight), this);
+        startTimeBox.LostFocus += (o,_) => { chapter.startTime = validateTimestamp((TextBox)o); MainForm.adjustRows(); };
         startTimeBox.Text = ch.startTime.ToString();
 
-        Util.createLabel("Title:", new Point(xpx += 60, ypx), new Size(40, boxheight), this);
-        titleBox = Util.createInput(new Point(xpx += 40, ypx), new Size(240, boxheight), this);
-        titleBox.LostFocus += (o,a) => { chapter.title = ((TextBox)o).Text; };
+        Util.createLabel("Title:", gridPoints[2,0], new Size(40, boxheight), this);
+        titleBox = Util.createInput(gridPoints[3,0], new Size(460, boxheight), this);
+        titleBox.LostFocus += (o,_) => { chapter.title = ((TextBox)o).Text; };
         titleBox.Text = ch.title;
 
-        Util.createLabel("Url:", new Point(xpx += 250, ypx), new Size(35, boxheight), this);
-        urlBox = Util.createInput(new Point(xpx += 35, ypx), new Size(240, boxheight), this);
-        urlBox.LostFocus += (o,a) => { chapter.url = ((TextBox)o).Text; };
-        urlBox.Text = ch.url;
-
-        ypx += boxheight;
-        xpx = 5;
-        Util.createLabel("End (hh:mm:ss):", new Point(xpx += 20, ypx), new Size(100, boxheight), this);
-        endTimeBox = Util.createInput(new Point(xpx += 100, ypx), new Size(50, boxheight), this);
-        endTimeBox.LostFocus += (o,a) => { chapter.endTime = validateTimestamp((TextBox)o); };
-        endTimeBox.Text = ch.endTime.ToString();
-
-        Util.createLabel("Img:", new Point(xpx += 60, ypx), new Size(40, boxheight), this);
-        imgBox = Util.createInput(new Point(xpx += 40, ypx), new Size(240, boxheight), this);
-        imgBox.LostFocus += (o,a) => { chapter.img = ((TextBox)o).Text; };
+        Util.createLabel("Img:", gridPoints[2,1], new Size(40, boxheight), this);
+        imgBox = Util.createInput(gridPoints[3,1], new Size(460, boxheight), this);
+        imgBox.LostFocus += (o,_) => { chapter.img = ((TextBox)o).Text; picBox.ImageLocation = ((TextBox)o).Text;};
         imgBox.Text = ch.img;
 
-        tocBox = Util.createCheckbox("Toc",  new Point(xpx += 250, ypx), new Size(60, boxheight), this, true);
-        tocBox.CheckedChanged += (o,a) => { chapter.toc = ((CheckBox)o).Checked; };
+        Util.createLabel("Url:", gridPoints[2,2], new Size(35, boxheight), this);
+        urlBox = Util.createInput(gridPoints[3,2], new Size(460, boxheight), this);
+        urlBox.LostFocus += (o,_) => { chapter.url = ((TextBox)o).Text; };
+        urlBox.Text = ch.url;
+
+        Util.createLabel("End (hh:mm:ss):", gridPoints[0,1], new Size(100, boxheight), this);
+        endTimeBox = Util.createInput(gridPoints[1,1], new Size(50, boxheight), this);
+        endTimeBox.LostFocus += (o,_) => { chapter.endTime = validateTimestamp((TextBox)o); };
+        endTimeBox.Text = ch.endTime.ToString();
+
+        tocBox = Util.createCheckbox("Toc",  gridPoints[1,2], new Size(60, boxheight), this, true);
+        tocBox.CheckedChanged += (o,_) => { chapter.toc = ((CheckBox)o).Checked; };
         tocBox.Checked = ch.toc;
 
+        picBox = new System.Windows.Forms.PictureBox();
+        picBox.Location = new Point(700,0);
+        picBox.Size = new Size(100, 100);
+        picBox.SizeMode = PictureBoxSizeMode.Zoom;
+        Controls.Add(picBox);
     }
 
     int validateTimestamp(TextBox inputbox) {
