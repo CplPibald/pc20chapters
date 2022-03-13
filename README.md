@@ -4,36 +4,25 @@ Winforms-based app for generating Podcast-2.0 compliant chapters file
 Creates a series of text boxes into which you can put your podcast chapter data.
 When you click "Save", it emits a .json file which you can publish with your RSS feed.
 
-Requires Powershell v5.0 or above (this is the default on Windows 10)
+Requires .NET framework v5.0.  If prompted, make sure you install the *desktop* version, and not console.
 
-##Enable running PS scripts:
+## Usage notes
 
-Microsoft ships both PowerShell and Windows Forms in every version of Windows.  But they make it difficult to run them.
-Microsoft disables running PowerShell scripts by default in Windows to prevent an attacker from tricking you into
-downloading and running malware.  You disable this security "feature" at your own risk.
+ * All timestamps are stored as integer number of seconds from the start of the episode.  You can also enter a timestamp in "hh:mm:ss" or "mm:ss" format, and it will be automatically converted.
+ * Blank fields will not be written to the json.  Endtime will only be written if greater than zero.  Start time is required, so is always written.
+ * The program has very little validation.  The text in the text boxes ends up in the chapters file.  Broken URLs, negative timestamps, or other tomfoolery will most likely be ignored by the user's podcast app.
 
-To enable Powershell for your operating system (and enable scripts from explorer.exe)
+## Download
 
-    Set-ExecutionPolicy Unrestricted -Scope CurrentUser
+Most recent binaries are in a zipfile in the cs/bin folder.  There are three files in there: DLL, EXE, and JSON
+All three must be in the same directory.  (If anyone knows how to make .NET build only one distributable file, let me know.)
 
-Once you do this, you'll never have to think about PowerShell execution policy again.
+## Build
 
-If you prefer to open a PowerShell window that allows scripts in just that session, launch using (Win+R):
+Source code is in cs folder.  csproj used to build is provided.  Visual Studio will know what to do.
 
-    powershell -ex unrestricted
+## Version history
 
-OR in any current powershell window
+1.03 = Port app to C# exe.  Some new features.
 
-    Set-ExecutionPolicy Unrestricted -Scope Process
-
-## Known bug:
-
-On some machines, there appears to be a race condition where the script doesn't load Windows Forms correctly.
-Instead there are TypeNotFound errors that look like "Unable to find type [GroupBox]"  (If anybody out there knows 
-how to fix this, I'm looking for help).  One workaround is to load Windows Forms before running the script.  Open
-a powershell window and run:
-
-    Add-Type -AssemblyName System.Windows.Forms
-    Add-Type -AssemblyName System.Drawing
-    d:\path\to\pc20chapters.ps1
-
+0.99 = Powershell version.  Found in v1-powershell folder, if you want to see it for any reason
