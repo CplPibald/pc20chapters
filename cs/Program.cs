@@ -8,6 +8,9 @@ using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+// TODO: program icon
+// TODO: url open link button
+
 namespace pc20chapters {
 static class Program {
 
@@ -34,6 +37,8 @@ public class MainForm : Form
 
     Button saveBtn = null;
 
+    public bool prettyJson { get; set; }
+
     public MainForm()
     {
         Text = Program.TITLETEXT;
@@ -48,18 +53,17 @@ public class MainForm : Form
         };
 
         // global buttons
-        Util.createButton("Open...", new Point(10, 5), new Size(75, 25), this, (o,a) => load());
-        saveBtn = Util.createButton("Save", new Point(95, 5), new Size(75, 25), this, (o,a) => {if (null != saveFileName) {_ = save(saveFileName);}});
+        Util.createButton("Open...", new Point(10, 5), new Size(75, 25), this, (_,_) => load());
+        saveBtn = Util.createButton("Save", new Point(95, 5), new Size(75, 25), this, (_,_) => {if (null != saveFileName) {_ = save(saveFileName);}});
         saveBtn.Enabled = false;
-        Util.createButton("Save As...", new Point(180, 5), new Size(75, 25), this, (o,a) => save());
-        var nchBtn = Util.createButton("New Chapter", new Point(265, 5), new Size(95, 25), this, 
-            (o,a) => { var chbx = createChapter(); adjustRows(); chbx.startTimeBox.Focus(); });
+        Util.createButton("Save As...", new Point(180, 5), new Size(75, 25), this, (_,_) => save());
+        var nchBtn = Util.createButton("New Chapter", new Point(365, 5), new Size(95, 25), this, 
+            (_,_) => { var chbx = createChapter(); adjustRows(); chbx.startTimeBox.Focus(); });
         AcceptButton = nchBtn;
+        var minifyBox = Util.createCheckbox("Pretty Json", new Point(265, 5), new Size(100, 25), this, false);
+        minifyBox.CheckedChanged += (o,_) => { prettyJson = ((CheckBox)o).Checked; };
 
         Size = new Size(900, 600);
-
-        //if (file) { load(file); }
-
     }
 
     public void load () { 
@@ -102,8 +106,9 @@ public class MainForm : Form
 
     public void save () { 
 
-        var sfd = new System.Windows.Forms.SaveFileDialog();
-        sfd.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
+        var sfd = new System.Windows.Forms.SaveFileDialog {
+            InitialDirectory = System.IO.Directory.GetCurrentDirectory()
+        };
         
         if (sfd.ShowDialog() != DialogResult.OK) {
             return;
@@ -117,7 +122,8 @@ public class MainForm : Form
         // TODO: sort output by startTime
 
         var serializerOptions = new JsonSerializerOptions {
-            Converters = { new ChapterJsonConverter() }
+            Converters = { new ChapterJsonConverter() },
+            WriteIndented = prettyJson
         };
 
         var doc = new DocumentWrapper();
@@ -186,7 +192,7 @@ public class ChapterBox : GroupBox {
     static readonly Point[,] gridPoints;
     static ChapterBox() {
 
-        int[] x_cols = { 30, 130, 190, 230 };
+        int[] x_cols = { 20, 130, 190, 230 };
         int[] y_rows = { 10, 35, 60 };
 
         gridPoints = new Point[x_cols.Length, y_rows.Length];
@@ -204,31 +210,38 @@ public class ChapterBox : GroupBox {
 
         var boxheight = 25;
         expanded = false;
-        deleteButton = Util.createButton("x", new Point(5, 0), new Size(20, 20), this, (o,_) => { MainForm.removeChapter((ChapterBox)(((Button)o).Tag)); }, this);
-        dropButton = Util.createButton("v", new Point(5, 25), new Size(20, 20), this, (o,_) => { ((ChapterBox)(((Button)o).Tag)).toggleExpanded(); }, this);
+        dropButton = Util.createButton("v", new Point(5, 25), new Size(18, 18), this, (o,_) => { ((ChapterBox)(((Button)o).Tag)).toggleExpanded(); }, this);
         dropButton.Visible = false;
 
-        Util.createLabel("Start (hh:mm:ss):", gridPoints[0,0], new Size(100, boxheight), this);
+        deleteButton = Util.createButton("", new Point(5, 0), new Size(18, 18), this, (o,_) => { MainForm.removeChapter((ChapterBox)(((Button)o).Tag)); }, this);
+        deleteButton.BackColor = Color.Red;
+        deleteButton.Paint += (o,e) => { 
+            var p = new Pen(Color.Black) { Width = 2 };
+            e.Graphics.DrawLine(p, new Point(4,4), new Point(12,12));
+            e.Graphics.DrawLine(p, new Point(4,12), new Point(12,4));
+        };
+
+        Util.createLabel("Start (h:mm:ss):", gridPoints[0,0], new Size(110, boxheight), this);
         startTimeBox = Util.createInput(gridPoints[1,0], new Size(50, boxheight), this);
         startTimeBox.LostFocus += (o,_) => { chapter.startTime = validateTimestamp((TextBox)o); MainForm.adjustRows(); };
         startTimeBox.Text = ch.startTime.ToString();
 
-        Util.createLabel("Title:", gridPoints[2,0], new Size(40, boxheight), this);
+        Util.createLabel("Title", gridPoints[2,0], new Size(40, boxheight), this);
         titleBox = Util.createInput(gridPoints[3,0], new Size(460, boxheight), this);
         titleBox.LostFocus += (o,_) => { chapter.title = ((TextBox)o).Text; };
         titleBox.Text = ch.title;
 
-        Util.createLabel("Img:", gridPoints[2,1], new Size(40, boxheight), this);
+        Util.createLabel("Img", gridPoints[2,1], new Size(40, boxheight), this);
         imgBox = Util.createInput(gridPoints[3,1], new Size(460, boxheight), this);
         imgBox.LostFocus += (o,_) => { chapter.img = ((TextBox)o).Text; picBox.ImageLocation = ((TextBox)o).Text;};
         imgBox.Text = ch.img;
 
-        Util.createLabel("Url:", gridPoints[2,2], new Size(35, boxheight), this);
+        Util.createLabel("Url", gridPoints[2,2], new Size(35, boxheight), this);
         urlBox = Util.createInput(gridPoints[3,2], new Size(460, boxheight), this);
         urlBox.LostFocus += (o,_) => { chapter.url = ((TextBox)o).Text; };
         urlBox.Text = ch.url;
 
-        Util.createLabel("End (hh:mm:ss):", gridPoints[0,1], new Size(100, boxheight), this);
+        Util.createLabel("End (h:mm:ss):", gridPoints[0,1], new Size(110, boxheight), this);
         endTimeBox = Util.createInput(gridPoints[1,1], new Size(50, boxheight), this);
         endTimeBox.LostFocus += (o,_) => { chapter.endTime = validateTimestamp((TextBox)o); };
         endTimeBox.Text = ch.endTime.ToString();
@@ -237,10 +250,11 @@ public class ChapterBox : GroupBox {
         tocBox.CheckedChanged += (o,_) => { chapter.toc = ((CheckBox)o).Checked; };
         tocBox.Checked = ch.toc;
 
-        picBox = new System.Windows.Forms.PictureBox();
-        picBox.Location = new Point(700,0);
-        picBox.Size = new Size(100, 100);
-        picBox.SizeMode = PictureBoxSizeMode.Zoom;
+        picBox = new System.Windows.Forms.PictureBox {
+            Location = new Point(700,0),
+            Size = new Size(100, 100),
+            SizeMode = PictureBoxSizeMode.Zoom
+        };
         Controls.Add(picBox);
     }
 
@@ -377,7 +391,7 @@ public class Util {
         Label t = new System.Windows.Forms.Label();
         t.Text = text;
         t.Location = pos;
-        //t.TextAlign = align;
+        t.TextAlign = ContentAlignment.MiddleRight;
         t.AutoSize = false;
         t.Size = size;
         parent.Controls.Add(t);
