@@ -8,9 +8,6 @@ using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-// TODO: program icon
-// TODO: url open link button
-
 namespace pc20chapters {
 static class Program {
 
@@ -68,10 +65,11 @@ public class MainForm : Form
 
     public void load () { 
 
-        var ofd = new OpenFileDialog();
-        ofd.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
-        ofd.DefaultExt = "json";
-        ofd.Filter = "JSON files (*.json)|*.json|All files|*";
+        var ofd = new OpenFileDialog {
+            InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
+            DefaultExt = "json",
+            Filter = "JSON files (*.json)|*.json|All files|*"
+        };
         
         if (ofd.ShowDialog() != DialogResult.OK) {
             return;
@@ -107,7 +105,10 @@ public class MainForm : Form
     public void save () { 
 
         var sfd = new System.Windows.Forms.SaveFileDialog {
-            InitialDirectory = System.IO.Directory.GetCurrentDirectory()
+            InitialDirectory = System.IO.Directory.GetCurrentDirectory(),
+            Filter = "JSON files (*.json)|*.json|All files|*",
+            DefaultExt = "json",
+            AddExtension = true
         };
         
         if (sfd.ShowDialog() != DialogResult.OK) {
@@ -119,7 +120,6 @@ public class MainForm : Form
     public async Task save (string file) {
         // TODO: check for invalid chapters
         //       Ignore if no startTime
-        // TODO: sort output by startTime
 
         var serializerOptions = new JsonSerializerOptions {
             Converters = { new ChapterJsonConverter() },
@@ -279,7 +279,6 @@ public class ChapterBox : GroupBox {
     }
 
     public void toggleExpanded () {
-        // TODO: Toggle visibility of any controls that are in bottom half of box
         expanded = !expanded;
         MainForm.adjustRows();
     }
