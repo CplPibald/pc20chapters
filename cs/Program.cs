@@ -50,15 +50,15 @@ public class MainForm : Form
         };
 
         // global buttons
-        Util.createButton("Open...", new Point(10, 5), new Size(75, 25), this, (_,_) => load());
-        saveBtn = Util.createButton("Save", new Point(95, 5), new Size(75, 25), this, (_,_) => {if (null != saveFileName) {_ = save(saveFileName);}});
+        Util.createButton("Open...", new Point(10, 5), new Size(100, 25), this, (_,_) => load());
+        saveBtn = Util.createButton("Save", new Point(120, 5), new Size(100, 25), this, (_,_) => {if (null != saveFileName) {_ = save(saveFileName);}});
         saveBtn.Enabled = false;
-        Util.createButton("Save As...", new Point(180, 5), new Size(75, 25), this, (_,_) => save());
-        var nchBtn = Util.createButton("New Chapter", new Point(365, 5), new Size(95, 25), this, 
+        Util.createButton("Save As...", new Point(230, 5), new Size(100, 25), this, (_,_) => save());
+        var minifyBox = Util.createCheckbox("Pretty Json", new Point(340, 5), new Size(125, 25), this, false);
+        minifyBox.CheckedChanged += (o,_) => { prettyJson = ((CheckBox)o).Checked; };
+        var nchBtn = Util.createButton("New Chapter", new Point(465, 5), new Size(120, 25), this, 
             (_,_) => { var chbx = createChapter(); adjustRows(); chbx.startTimeBox.Focus(); });
         AcceptButton = nchBtn;
-        var minifyBox = Util.createCheckbox("Pretty Json", new Point(265, 5), new Size(100, 25), this, false);
-        minifyBox.CheckedChanged += (o,_) => { prettyJson = ((CheckBox)o).Checked; };
 
         Size = new Size(900, 600);
     }
@@ -127,7 +127,7 @@ public class MainForm : Form
         };
 
         var doc = new DocumentWrapper();
-        doc.chapters = chapters;
+        doc.chapters = chapters.OrderBy(o => o.startTime).ToList();
         doc.version = Program.PC20CHAPTERSVERSION;
 
         using System.IO.FileStream fs = System.IO.File.Create(file);
